@@ -11,22 +11,35 @@ namespace WebDavCore
     public class HttpServer : IDisposable
     {
         private SocketServer Server { get; }
+        public IList<IHttpRouter> Routers { get; } = new List<IHttpRouter>();
 
         public HttpServer(IPAddress address, ushort port)
         {
             this.Server = new SocketServer(address, port);
         }
 
-        public async Task Start(Func<HttpRequest, HttpResponse> process, CancellationToken token)
+        public async Task Start(CancellationToken token)
         {
             await Server.Start(async client =>
             {
                 HttpRequest request = await HttpRequest.ParseAsync(client);
-                HttpResponse response = process?.Invoke(request);
+                HttpResponse response = null;
 
                 try
                 {
-                    await response.ResponseClient(client);
+                    foreach (var router in Routers)
+                    {
+                        if (router.IsEndPoint(request.Path))
+                        {
+                            response = router.EndPoint.OnRequest(request);
+
+                            await response.ResponseClient(client);
+
+                            break;
+                        }
+                    }
+
+                    await HttpResponse.FromString("404 Not Found", 404).ResponseClient(client);
                 }
                 catch (Exception e)
                 {
@@ -35,13 +48,13 @@ namespace WebDavCore
                 finally
                 {
                     client.Dispose();
-                    response.Dispose();
+                    response?.Dispose();
                 }
 
             }, token);
         }
 
-        public async Task Start(Func<HttpRequest, HttpResponse> process) => await Start(process, CancellationToken.None);
+        public async Task Start() => await Start(CancellationToken.None);
 
         public void Dispose()
         {
