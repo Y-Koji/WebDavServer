@@ -14,12 +14,10 @@ namespace XUnitTest
             HttpServer http = new HttpServer(IPAddress.Any, 8080);
             http.Start(request =>
             {
-                return new HttpResponse
-                {
-                    Status = 200,
-                    ContentType = "text/plain",
-                    Body = Encoding.UTF8.GetBytes("Hello, World!"),
-                };
+                HttpResponse response = HttpResponse.FromFile(@"E:\Video\_Record\ScreenRecording_12-08-2018 19-43-38.mp4");
+                response.Headers.Add("Accept-Ranges", "bytes");
+
+                return response;
             }).Wait();
 
             http.Dispose();

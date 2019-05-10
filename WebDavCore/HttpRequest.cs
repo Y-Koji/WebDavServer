@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -26,6 +27,7 @@ namespace WebDavCore
             request.Method = firstLine.Split(' ')[0];
             request.Path = firstLine.Split(' ')[1];
             request.Version = firstLine.Split(' ')[2];
+            Debug.WriteLine("< " + firstLine);
 
             Dictionary<string, string> headers = new Dictionary<string, string>();
             for (string line = sr.ReadLine();!string.IsNullOrWhiteSpace(line); line = sr.ReadLine())
@@ -34,10 +36,13 @@ namespace WebDavCore
                 string value = line.Split(':')[1].Trim();
 
                 headers.Add(key, value);
+
+                Debug.WriteLine("< " + line);
             }
 
             request.Headers = headers;
-
+            Debug.WriteLine("");
+            
             return request;
         }
     }

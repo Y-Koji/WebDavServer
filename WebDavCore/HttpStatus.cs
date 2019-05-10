@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
-using WebDavCore.Properties;
 
 namespace WebDavCore
 {
     public class HttpStatus
     {
-        public static IDictionary<int, string> CodeList = Json.Deserialize<IDictionary<int, string>>(Resources.status);
+        public static IDictionary<int, string> CodeList = Json.Deserialize<IDictionary<int, string>>(File.ReadAllBytes("Resources\\status.json"));
         public int Code { get; private set; }
         public string Message { get; private set; }
 

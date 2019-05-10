@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -29,13 +30,12 @@ namespace WebDavCore
                 {
                     TcpClient client = await Listener.AcceptTcpClientAsync();
 
-                    Task.Run(() => action?.Invoke(client))
-                        .ContinueWith(_ => { if (client.Connected) { client.Dispose(); } })
-                        .Dispose();
+                    Task.Run(() => action?.Invoke(client)).Dispose();
                 }
                 catch (Exception e)
                 {
-
+                    Debug.WriteLine("Exception: SocketServer#Start");
+                    Debug.WriteLine(e);
                 }
             }
         }

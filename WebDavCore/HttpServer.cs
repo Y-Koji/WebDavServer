@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -21,10 +22,22 @@ namespace WebDavCore
             await Server.Start(async client =>
             {
                 HttpRequest request = await HttpRequest.ParseAsync(client);
-
                 HttpResponse response = process?.Invoke(request);
 
-                await response.ResponseClient(client);
+                try
+                {
+                    await response.ResponseClient(client);
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                }
+                finally
+                {
+                    client.Dispose();
+                    response.Dispose();
+                }
+
             }, token);
         }
 
