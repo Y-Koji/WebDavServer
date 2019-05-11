@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using WebDavCore.Exceptions;
 
 namespace WebDavCore
 {
@@ -24,10 +25,23 @@ namespace WebDavCore
 
             StreamReader sr = new StreamReader(client.GetStream());
             string firstLine = await sr.ReadLineAsync();
-            request.Method = firstLine.Split(' ')[0];
-            request.Path = firstLine.Split(' ')[1];
-            request.Version = firstLine.Split(' ')[2];
-            Debug.WriteLine("< " + firstLine);
+            if (!string.IsNullOrWhiteSpace(firstLine))
+            {
+                string[] split = firstLine.Split(' ');
+                if (split.Length != 3)
+                {
+                    throw new HttpRequestPersingException("HTTP リクエストの最初の行が不正です．\r\n" + firstLine);
+                }
+
+                request.Method = split[0];
+                request.Path = Uri.UnescapeDataString(split[1]);
+                request.Version = split[2];
+                Debug.WriteLine("< " + firstLine);
+            }
+            else
+            {
+                throw new HttpRequestPersingException("HTTP リクエストの最初の行がありません．");
+            }
 
             Dictionary<string, string> headers = new Dictionary<string, string>();
             for (string line = sr.ReadLine();!string.IsNullOrWhiteSpace(line); line = sr.ReadLine())

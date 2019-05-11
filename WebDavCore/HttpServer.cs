@@ -11,7 +11,7 @@ namespace WebDavCore
     public class HttpServer : IDisposable
     {
         private SocketServer Server { get; }
-        public IList<IHttpRouter> Routers { get; } = new List<IHttpRouter>();
+        public IList<IHttpEndPoint> EndPoints { get; } = new List<IHttpEndPoint>();
 
         public HttpServer(IPAddress address, ushort port)
         {
@@ -22,16 +22,17 @@ namespace WebDavCore
         {
             await Server.Start(async client =>
             {
-                HttpRequest request = await HttpRequest.ParseAsync(client);
                 HttpResponse response = null;
 
                 try
                 {
-                    foreach (var router in Routers)
+                    HttpRequest request = await HttpRequest.ParseAsync(client);
+                    
+                    foreach (var endpoint in EndPoints)
                     {
-                        if (router.IsEndPoint(request.Path))
+                        if (endpoint.OnPathMatch(request.Path))
                         {
-                            response = router.EndPoint.OnRequest(request);
+                            response = endpoint.OnRequest(request);
 
                             await response.ResponseClient(client);
 

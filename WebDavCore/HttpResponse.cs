@@ -29,6 +29,17 @@ namespace WebDavCore
             return response;
         }
 
+        public static HttpResponse FromHtml(string html, int status = 200)
+        {
+            HttpResponse response = new HttpResponse();
+            response.Status = status;
+            response.MediaType = MediaType.FromFile("test.html");
+            response.Body = new MemoryStream(Encoding.UTF8.GetBytes(html));
+            response.ContentLength = Encoding.UTF8.GetByteCount(html);
+
+            return response;
+        }
+
         public static HttpResponse FromFile(string fileName, int status = 200)
         {
             HttpResponse response = new HttpResponse();

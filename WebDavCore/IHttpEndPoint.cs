@@ -6,6 +6,8 @@ namespace WebDavCore
 {
     public interface IHttpEndPoint
     {
+        bool OnPathMatch(string path);
+
         HttpResponse OnRequest(HttpRequest request);
     }
 }
